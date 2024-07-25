@@ -47,7 +47,6 @@ void	*timer_tick(void *ptr)
 		ft_usleep(1, rt);
 		rt->cur_tick = get_tick() - rt->start_tick;
 	}
-	printf("exit timer\n");
 	pthread_exit(NULL);
 }
 

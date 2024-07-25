@@ -105,13 +105,15 @@ int	main(int argc, char **argv)
 {
 	t_runtime runtime;
 
+	if (DEBUG)
+		printf("program in in debug mode\n");
 	memset(&runtime, 0, sizeof(runtime));
 	if (!parse_input(argc, argv, &runtime))
 		return (1);
 	if (initialize_struct(&runtime, runtime.data[PHILO_COUNT]))
-	{
 		philosophers(&runtime);
-	}
+	if (runtime.eflag != 0)
+		printf("%s\n", ERR_THREAD);
 	clean_struct(&runtime);
 	return (0);
 }

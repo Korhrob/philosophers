@@ -1,16 +1,18 @@
-NAME	= philosopher
-CC		= cc -g -Wall -Werror -Wextra
-SRC		= main.c threads.c philos.c timer.c mini_libft.c watcher.c
-OBJ		= $(SRC:.c=.o)
+NAME    = philosopher
+CC      = cc
+CFLAGS  = -g -Wall -Werror -Wextra
+DEBUG   = -DDEBUG=1
+SRC     = main.c threads.c philos_refactor.c timer.c mini_libft.c watcher.c
+OBJ     = $(SRC:.c=.o)
 
 all: $(NAME)
 
 $(NAME): $(OBJ)
-	$(CC) -o $(NAME) $(OBJ)
+	$(CC) $(CFLAGS) -o $(NAME) $(OBJ)
 	@echo $(NAME)
 
 %.o: %.c
-	$(CC) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -f $(OBJ)
@@ -18,6 +20,11 @@ clean:
 fclean: clean
 	rm -f $(NAME)
 
-re: clean all
+re: fclean all
 
-.PHONY: all clean fclean re
+debug: CFLAGS += $(DEBUG)
+debug: fclean $(OBJ)
+	$(CC) $(CFLAGS) -o $(NAME) $(OBJ)
+	@echo "$(NAME) (debug)"
+
+.PHONY: all clean fclean re debug
