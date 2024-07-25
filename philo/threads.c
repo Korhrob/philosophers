@@ -11,8 +11,9 @@ static void init_mutex(t_runtime *rt)
 	int	i;
 
 	i = 0;
-	pthread_mutex_init(&rt->mutex, NULL);
+	pthread_mutex_init(&rt->print, NULL);
 	pthread_mutex_init(&rt->tick, NULL);
+	pthread_mutex_init(&rt->counter, NULL);
 	while (i < rt->data[PHILO_COUNT])
 	{
 		pthread_mutex_init(&rt->forks[i], NULL);
@@ -32,8 +33,9 @@ static void destroy_mutex(t_runtime *rt)
 		pthread_mutex_destroy(&rt->forks[i]);
 		i++;
 	}
-	pthread_mutex_destroy(&rt->mutex);
+	pthread_mutex_destroy(&rt->print);
 	pthread_mutex_destroy(&rt->tick);
+	pthread_mutex_destroy(&rt->counter);
 }
 
 /// @brief create philo threads
@@ -45,7 +47,7 @@ static void	create_threads(t_runtime *rt)
 	i = 0;
 	while (i < rt->data[PHILO_COUNT])
 	{
-		if (!pthread_create(&rt->philos[i]->thread, NULL, &philo_routine, rt->philos[i]))
+		if (pthread_create(&rt->philos[i]->thread, NULL, &philo_routine, rt->philos[i]))
 			rt->eflag |= FLAG_PHILO;
 		usleep(1);
 		i++;
@@ -69,7 +71,11 @@ void	philosophers(t_runtime *rt)
 	i = 0;
 	while (i < rt->data[PHILO_COUNT])
 	{
-		pthread_join(rt->philos[i]->thread, NULL);
+		if (pthread_join(rt->philos[i]->thread, NULL))
+		{
+			printf("thread join failed at %d\n", i);
+			rt->alive = 0;
+		}
 		i++;
 	}
 	destroy_mutex(rt);

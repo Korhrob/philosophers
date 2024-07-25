@@ -47,11 +47,15 @@ void	*timer_tick(void *ptr)
 		ft_usleep(1, rt);
 		rt->cur_tick = get_tick() - rt->start_tick;
 	}
+	printf("exit timer\n");
 	pthread_exit(NULL);
 }
 
 void	create_timer(t_runtime *rt)
 {
-	if (!pthread_create(&rt->timer, NULL, &timer_tick, rt))
+	if (pthread_create(&rt->timer, NULL, &timer_tick, rt))
+	{
 		rt->eflag |= FLAG_TIMER;
+		printf("timer thread failed\n");
+	}
 }

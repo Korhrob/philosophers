@@ -16,6 +16,8 @@ static t_philo	*create_philo(t_runtime *rt, int id)
 		return (NULL);
 	p->id = id;
 	p->rt = rt;
+	p->l_fork = -1;
+	p->r_fork = -1;
 	return (p);
 }
 
@@ -113,5 +115,3 @@ int	main(int argc, char **argv)
 	clean_struct(&runtime);
 	return (0);
 }
-
-// handle single philo (not enough forks, should just die)

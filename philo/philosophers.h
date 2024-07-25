@@ -43,14 +43,16 @@ typedef struct	s_philo
 	t_uint		last_eat;
 	t_uint		eat_count;
 	t_uint		is_eating;
-	t_uint		l_fork;
-	t_uint		r_fork;
+	t_uint		removed;
+	int			l_fork;
+	int			r_fork;
 	t_runtime	*rt;
-	pthread_t	thread; // could move to rt
+	pthread_t	thread;
 }	t_philo;
 
 typedef struct	s_runtime
 {
+	int			body_count;
 	int			eflag;
 	int			data[6];
 	t_uint		start_tick;
@@ -61,7 +63,8 @@ typedef struct	s_runtime
 	pthread_t	watcher;
 	t_mutex		*forks;
 	t_mutex		tick;
-	t_mutex		mutex; // for print
+	t_mutex		print;
+	t_mutex		counter;
 }	t_runtime;
 
 // mini libft

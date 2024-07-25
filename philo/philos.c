@@ -9,10 +9,12 @@
 /// @param tick current tick
 /// @param id philo id
 /// @param msg_id message id
-static void	philo_write(t_mutex *mutex, int tick, int id, int msg_id)
+static void	philo_write(t_philo *p, int msg_id)
 {
 	const char	*str;
 
+	if (p->is_dead)
+		return ;
 	if (msg_id == 1)
 		str = MSG_THINK;
 	else if (msg_id == 2)
@@ -25,9 +27,9 @@ static void	philo_write(t_mutex *mutex, int tick, int id, int msg_id)
 		str = MSG_DIE;
 	else
 		return ;
-	pthread_mutex_lock(mutex);
-	printf("%4d %d %s\n", tick, id, str);
-	pthread_mutex_unlock(mutex);
+	pthread_mutex_lock(&p->rt->print);
+	printf("%4d %d %s\n", p->rt->cur_tick, p->id, str);
+	pthread_mutex_unlock(&p->rt->print);
 }
 
 /// @brief philosopher think logic
@@ -37,17 +39,19 @@ static int	philo_think(t_philo *p)
 {
 	if (p->is_dead)
 		return (1);
-	philo_write(&(p->rt->mutex), p->rt->cur_tick, p->id, 1);
+	philo_write(p, 1);
 	p->l_fork = p->id;
 	p->r_fork = (p->id + 1) % p->rt->data[PHILO_COUNT];
+	if (p->l_fork == p->r_fork)
+	{
+		p->is_dead = 1;
+		ft_usleep(p->rt->data[TIME_TO_DIE], p->rt);
+		return (p->is_dead);
+	}
 	pthread_mutex_lock(&p->rt->forks[p->l_fork]);
-	if (p->is_dead)
-		return (1);
-	philo_write(&p->rt->mutex, p->rt->cur_tick, p->id, 2);
+	philo_write(p, 2);
 	pthread_mutex_lock(&p->rt->forks[p->r_fork]);
-	if (p->is_dead)
-		return (1);
-	philo_write(&p->rt->mutex, p->rt->cur_tick, p->id, 2);
+	philo_write(p,  2);
 	return (p->is_dead);
 }
 
@@ -56,10 +60,13 @@ static int	philo_think(t_philo *p)
 /// @return is_dead
 static int	philo_eat(t_philo *p)
 {
-	if (p->is_dead)
+	if (p->is_dead) {
+	pthread_mutex_unlock(&(p->rt->forks[p->l_fork]));
+	pthread_mutex_unlock(&(p->rt->forks[p->r_fork]));
 		return (1);
+	}
 	p->is_eating = 1;
-	philo_write(&(p->rt->mutex), p->rt->cur_tick, p->id, 3);
+	philo_write(p, 3);
 	p->eat_count++;
 	ft_usleep(p->rt->data[TIME_TO_EAT], p->rt);
 	p->last_eat = p->rt->cur_tick;
@@ -76,7 +83,7 @@ static int	philo_sleep(t_philo *p)
 {
 	if (p->is_dead)
 		return (1);
-	philo_write(&(p->rt->mutex), p->rt->cur_tick, p->id, 4);
+	philo_write(p, 4);
 	ft_usleep(p->rt->data[TIME_TO_SLEEP], p->rt);
 	return (p->is_dead);
 }
@@ -95,14 +102,14 @@ void	*philo_routine(void *ptr)
 		pthread_exit(NULL);
 	}
 	p->last_eat = p->rt->cur_tick;
-	while (!p->is_dead)
+	while (!p->is_dead && p->rt->alive)
 	{
-		if (!p->is_dead)
-			p->is_dead = philo_think(p);
-		if (!p->is_dead)
-			p->is_dead = philo_eat(p);
-		if (!p->is_dead)
-			p->is_dead = philo_sleep(p);
+		philo_think(p);
+		philo_eat(p);
+		philo_sleep(p);
 	}
+	pthread_mutex_lock(&p->rt->counter);
+	p->removed = 1;
+	pthread_mutex_unlock(&p->rt->counter);
 	pthread_exit(NULL);
 }
