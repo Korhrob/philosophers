@@ -27,8 +27,10 @@ static void	philo_write(t_philo *p, int msg_id)
 		str = MSG_DIE;
 	else
 		return ;
+	if (!p->is_dead)
 	pthread_mutex_lock(&p->rt->print);
-	printf("%4d %d %s\n", p->rt->cur_tick, p->id, str);
+	if (!p->is_dead)
+		printf("%4d %d %s\n", p->rt->cur_tick, p->id, str);
 	pthread_mutex_unlock(&p->rt->print);
 }
 
@@ -48,9 +50,11 @@ static int	philo_think(t_philo *p)
 		ft_usleep(p->rt->data[TIME_TO_DIE], p->rt);
 		return (p->is_dead);
 	}
-	pthread_mutex_lock(&p->rt->forks[p->l_fork]);
+	if (!p->is_dead)
+		pthread_mutex_lock(&p->rt->forks[p->l_fork]);
 	philo_write(p, 2);
-	pthread_mutex_lock(&p->rt->forks[p->r_fork]);
+	if (!p->is_dead)
+		pthread_mutex_lock(&p->rt->forks[p->r_fork]);
 	philo_write(p,  2);
 	return (p->is_dead);
 }
@@ -61,13 +65,13 @@ static int	philo_think(t_philo *p)
 static int	philo_eat(t_philo *p)
 {
 	if (p->is_dead) {
-	pthread_mutex_unlock(&(p->rt->forks[p->l_fork]));
-	pthread_mutex_unlock(&(p->rt->forks[p->r_fork]));
+		pthread_mutex_unlock(&(p->rt->forks[p->l_fork]));
+		pthread_mutex_unlock(&(p->rt->forks[p->r_fork]));
 		return (1);
 	}
 	p->is_eating = 1;
-	philo_write(p, 3);
 	p->eat_count++;
+	philo_write(p, 3);
 	ft_usleep(p->rt->data[TIME_TO_EAT], p->rt);
 	p->last_eat = p->rt->cur_tick;
 	p->is_eating = 0;

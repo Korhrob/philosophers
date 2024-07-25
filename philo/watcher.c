@@ -21,7 +21,7 @@ static void	detach_philos(t_runtime *rt)
 	{
 		if (!rt->philos[i]->removed)
 		{
-			printf("detaching philo %d... state: %d\n", i, rt->philos[i]->debug_state);
+			printf("detaching philo %d... \n", i);
 			pthread_detach(rt->philos[i]->thread);
 		}
 		i++;
