@@ -1,6 +1,6 @@
 NAME	= philosopher
-CC		= cc -g #-Wall -Werror -Wextra
-SRC		= main.c philosophers.c routine.c time.c mini_libft.c
+CC		= cc -g -Wall -Werror -Wextra
+SRC		= main.c philosophers.c routine.c timer.c mini_libft.c watcher.c
 OBJ		= $(SRC:.c=.o)
 
 all: $(NAME)

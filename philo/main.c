@@ -53,11 +53,12 @@ static void	clean_struct(t_runtime *rt)
 	int	i;
 
 	if (rt->philos) {
-		i = -1;
-		while (++i < rt->data[PHILO_COUNT])
+		i = 0;
+		while (i < rt->data[PHILO_COUNT])
 		{
-			printf("free %d\n", i);
-			free(rt->philos[i]);
+			if (rt->philos[i])
+				free(rt->philos[i]);
+			i++;
 		}
 		free(rt->philos);
 	}
@@ -82,9 +83,9 @@ static int	parse_input(int argc, char **argv, t_runtime *rt)
 		printf(HINT_FORMAT);
 		return (0);
 	}
+	memset(rt->data, 0, DATA_MAX);
 	while (i < DATA_MAX && i < (argc - 1))
 	{
-		rt->data[(t_data)i] = 0;
 		j = ft_atoi(argv[i + 1]);
 		if (j <= 0)
 		{
@@ -106,7 +107,9 @@ int	main(int argc, char **argv)
 	if (!parse_input(argc, argv, &runtime))
 		return (1);
 	if (initialize_struct(&runtime, runtime.data[PHILO_COUNT]))
+	{
 		philosophers(&runtime);
+	}
 	clean_struct(&runtime);
 	return (0);
 }

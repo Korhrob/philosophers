@@ -4,6 +4,11 @@
 #include <unistd.h>
 #include <pthread.h>
 
+/// @brief printing with mutex
+/// @param mutex mutex
+/// @param tick current tick
+/// @param id philo id
+/// @param msg_id message id
 static void	philo_write(t_mutex *mutex, int tick, int id, int msg_id)
 {
 	const char	*str;
@@ -25,6 +30,9 @@ static void	philo_write(t_mutex *mutex, int tick, int id, int msg_id)
 	pthread_mutex_unlock(mutex);
 }
 
+/// @brief philosopher think logic
+/// @param p philo
+/// @return is_dead
 static int	philo_think(t_philo *p)
 {
 	if (p->is_dead)
@@ -33,12 +41,19 @@ static int	philo_think(t_philo *p)
 	p->l_fork = p->id;
 	p->r_fork = (p->id + 1) % p->rt->data[PHILO_COUNT];
 	pthread_mutex_lock(&p->rt->forks[p->l_fork]);
+	if (p->is_dead)
+		return (1);
 	philo_write(&p->rt->mutex, p->rt->cur_tick, p->id, 2);
 	pthread_mutex_lock(&p->rt->forks[p->r_fork]);
+	if (p->is_dead)
+		return (1);
 	philo_write(&p->rt->mutex, p->rt->cur_tick, p->id, 2);
 	return (p->is_dead);
 }
 
+/// @brief philosopher eat logic
+/// @param p philo
+/// @return is_dead
 static int	philo_eat(t_philo *p)
 {
 	if (p->is_dead)
@@ -54,6 +69,9 @@ static int	philo_eat(t_philo *p)
 	return (p->is_dead);
 }
 
+/// @brief philosopher sleep logic
+/// @param p philo
+/// @return is_dead
 static int	philo_sleep(t_philo *p)
 {
 	if (p->is_dead)
@@ -63,6 +81,9 @@ static int	philo_sleep(t_philo *p)
 	return (p->is_dead);
 }
 
+/// @brief main logic for single philosopher
+/// @param ptr philo
+/// @return NULL
 void	*philo_routine(void *ptr)
 {
 	t_philo *p;
@@ -72,7 +93,6 @@ void	*philo_routine(void *ptr)
 	{
 		printf("null philo\n");
 		pthread_exit(NULL);
-		return (NULL);
 	}
 	p->last_eat = p->rt->cur_tick;
 	while (!p->is_dead)
@@ -85,5 +105,4 @@ void	*philo_routine(void *ptr)
 			p->is_dead = philo_sleep(p);
 	}
 	pthread_exit(NULL);
-	return (NULL);
 }
