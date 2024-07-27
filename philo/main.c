@@ -95,7 +95,8 @@ static int	parse_input(int argc, char **argv, t_runtime *rt)
 			printf(HINT_NUMBER);
 			return (0);
 		}
-		rt->data[(t_data)i] = j;
+		rt->data[i] = j;
+		rt->data_ms[i] = j * 1000;
 		i++;
 	}
 	return (1);
@@ -105,13 +106,15 @@ int	main(int argc, char **argv)
 {
 	t_runtime runtime;
 
+	if (DEBUG)
+		printf(HINT_DEBUG);
 	memset(&runtime, 0, sizeof(runtime));
 	if (!parse_input(argc, argv, &runtime))
 		return (1);
 	if (initialize_struct(&runtime, runtime.data[PHILO_COUNT]))
-	{
 		philosophers(&runtime);
-	}
+	if (runtime.eflag)
+		printf("eflag: %s\n", ERR_THREAD);
 	clean_struct(&runtime);
 	return (0);
 }
