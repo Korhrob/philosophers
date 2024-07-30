@@ -30,6 +30,12 @@ static void	philo_think(t_philo *p)
 	philo_print(p, MSG_THINK);
 	p->l_fork = p->id;
 	p->r_fork = (p->id + 1) % p->rt->data[PHILO_COUNT];
+	if (p->id % 2 == 1)
+	{
+		p->l_fork = p->l_fork ^ p->r_fork;
+		p->r_fork = p->l_fork ^ p->r_fork;
+		p->l_fork = p->l_fork ^ p->r_fork;
+	}
 	p->debug_state = STATE_WAIT_L_FORK;
 	pthread_mutex_lock(&p->rt->forks[p->l_fork]);
 	philo_print(p, MSG_FORK);
@@ -58,13 +64,11 @@ static void	philo_eat(t_philo *p)
 	if (!p->rt->alive)
 		return ;
 	p->debug_state = STATE_EAT;
-	p->is_eating = TRUE;
 	p->eat_count++;
 	philo_print(p, MSG_EAT);
 	usleep(p->rt->data_ms[TIME_TO_EAT]);
 	pthread_mutex_unlock(&p->rt->forks[p->l_fork]);
 	pthread_mutex_unlock(&p->rt->forks[p->r_fork]);
-	p->is_eating = FALSE;
 	p->last_eat = p->rt->cur_tick;
 	p->l_fork = -1;
 	p->r_fork = -1;
@@ -93,10 +97,8 @@ void	*philo_routine_new(void *ptr)
 	}
 	pthread_mutex_lock(&p->rt->ready);
 	pthread_mutex_unlock(&p->rt->ready);
-	pthread_mutex_lock(&p->rt->tick);
 	p->last_eat = p->rt->cur_tick;
-	pthread_mutex_unlock(&p->rt->tick);
-	while (!p->is_dead)
+	while (!p->is_dead && p->rt->alive)
 	{
 		philo_think(p);
 		philo_eat(p);
@@ -104,5 +106,5 @@ void	*philo_routine_new(void *ptr)
 	}
 	p->thread_status = THREAD_CLEAN_EXIT;
 	p->debug_state = STATE_ENDED;
-	pthread_exit(NULL);
+	return (0);
 }

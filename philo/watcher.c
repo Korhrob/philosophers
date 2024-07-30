@@ -76,18 +76,15 @@ static int	check_death(t_runtime *rt, t_philo *philo)
 		return (0);
 	if (rt->cur_tick > (philo->last_eat + rt->data[TIME_TO_DIE]))
 	{
-		if (philo->is_eating == 0)
+		philo->is_dead = 0;
+		if (rt->alive)
 		{
-			philo->is_dead = 0;
-			if (rt->alive)
-			{
-				pthread_mutex_lock(&rt->print);
-				rt->alive = 0;
-				printf("philo %d died on tick %d, expected death tick %d\n", philo->id, get_tick() - rt->start_tick, philo->last_eat + rt->data[TIME_TO_DIE]);
-				pthread_mutex_unlock(&rt->print);
-			}
-			return (1);
+			pthread_mutex_lock(&rt->print);
+			rt->alive = 0;
+			printf("philo %d died on tick %d, expected death tick %d\n", philo->id, get_tick() - rt->start_tick, philo->last_eat + rt->data[TIME_TO_DIE]);
+			pthread_mutex_unlock(&rt->print);
 		}
+		return (1);
 	}
 	return (0);
 }
@@ -113,7 +110,7 @@ void	*watch_philos(void *ptr)
 		usleep(1000000);
 	}
 	detach_philos(rt);
-	pthread_exit(NULL);
+	return (0);
 }
 
 /// @brief create a watcher thread and set error flag if needed

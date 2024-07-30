@@ -50,7 +50,7 @@ void	*timer_tick(void *ptr)
 		rt->cur_tick = get_tick() - rt->start_tick;
 		pthread_mutex_unlock(&rt->tick);
 	}
-	pthread_exit(NULL);
+	return (0);
 }
 
 void	create_timer(t_runtime *rt)

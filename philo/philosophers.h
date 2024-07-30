@@ -81,7 +81,6 @@ typedef struct	s_philo
 	volatile t_uint		is_dead;
 	t_uint		last_eat;
 	t_uint		eat_count;
-	t_uint		is_eating;
 	t_uint		debug_state;
 	t_uint		debug_state_count;
 	int			l_fork;

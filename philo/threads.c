@@ -45,6 +45,8 @@ static void	create_threads(t_runtime *rt)
 	int	i;
 
 	i = 0;
+	create_timer(rt);
+	create_watcher(rt);
 	while (i < rt->data[PHILO_COUNT])
 	{
 		if (pthread_create(&rt->philos[i]->thread, NULL, &philo_routine_new, rt->philos[i]))
@@ -67,8 +69,6 @@ void	philosophers(t_runtime *rt)
 
 	init_mutex(rt);
 	pthread_mutex_lock(&rt->ready);
-	create_timer(rt);
-	create_watcher(rt);
 	create_threads(rt);
 	if (rt->eflag)
 		rt->alive = FALSE;
@@ -82,12 +82,12 @@ void	philosophers(t_runtime *rt)
 			rt->alive = FALSE;
 			rt->philos[i]->thread_status = THREAD_JOIN_FAIL;
 			rt->eflag |= (rt->eflag & FLAG_JOIN);
-			break ;
 		}
 		i++;
 	}
 	pthread_mutex_unlock(&rt->ready);
-	pthread_join(rt->timer, NULL);
 	pthread_join(rt->watcher, NULL);
+	pthread_join(rt->timer, NULL);
+	
 	destroy_mutex(rt);
 }
