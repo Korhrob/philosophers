@@ -25,7 +25,7 @@ static t_philo	*create_philo(t_runtime *rt, int id)
 /// @param rt runtime struct
 /// @param philos number of philosophers
 /// @return 0 = malloc fail, 1 = success
-static int initialize_struct(t_runtime *rt, int philos)
+static int	initialize_struct(t_runtime *rt, int philos)
 {
 	int	i;
 
@@ -40,7 +40,7 @@ static int initialize_struct(t_runtime *rt, int philos)
 		rt->philos[i] = create_philo(rt, i);
 		if (!rt->philos[i])
 		{
-			printf("malloc fail philo\n");
+			printf(ERR_MALLOC);
 			return (0);
 		}
 		i++;
@@ -54,7 +54,8 @@ static void	clean_struct(t_runtime *rt)
 {
 	int	i;
 
-	if (rt->philos) {
+	if (rt->philos)
+	{
 		i = 0;
 		while (i < rt->data[PHILO_COUNT])
 		{
@@ -104,7 +105,7 @@ static int	parse_input(int argc, char **argv, t_runtime *rt)
 
 int	main(int argc, char **argv)
 {
-	t_runtime runtime;
+	t_runtime	runtime;
 
 	if (DEBUG)
 		printf(HINT_DEBUG);
@@ -113,8 +114,6 @@ int	main(int argc, char **argv)
 		return (1);
 	if (initialize_struct(&runtime, runtime.data[PHILO_COUNT]))
 		philosophers(&runtime);
-	if (runtime.eflag)
-		printf("eflag: %s\n", ERR_THREAD);
 	clean_struct(&runtime);
 	return (0);
 }

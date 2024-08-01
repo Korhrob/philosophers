@@ -4,7 +4,9 @@
 #include <unistd.h>
 #include <pthread.h>
 
-// most common place to get stuck waiting
+/// @brief print what while is currently doing
+/// @param p pointer to philo
+/// @param msg message
 static void	philo_print(t_philo *p, const char *msg)
 {
 	if (p->is_dead)
@@ -18,9 +20,15 @@ static void	philo_print(t_philo *p, const char *msg)
 	pthread_mutex_unlock(&p->rt->print);
 }
 
-// potential deadlock situation
-// l or r fork locks, waits for philo_print, but never gets to print
-// thinking is now locking fork until all prints are resolved
+/// @brief philos are thinking while waiting for forks
+/// used to swap forks like this, but it caused issues
+/// if (p->id % 2 == 1)
+/// {
+/// 	p->l_fork = p->l_fork ^ p->r_fork;
+/// 	p->r_fork = p->l_fork ^ p->r_fork;
+/// 	p->l_fork = p->l_fork ^ p->r_fork;
+/// }
+/// @param p pointer to philo
 static void	philo_think(t_philo *p)
 {
 	if (p->is_dead)
@@ -30,18 +38,12 @@ static void	philo_think(t_philo *p)
 	philo_print(p, MSG_THINK);
 	p->l_fork = p->id;
 	p->r_fork = (p->id + 1) % p->rt->data[PHILO_COUNT];
-	if (p->id % 2 == 1)
-	{
-		p->l_fork = p->l_fork ^ p->r_fork;
-		p->r_fork = p->l_fork ^ p->r_fork;
-		p->l_fork = p->l_fork ^ p->r_fork;
-	}
 	p->debug_state = STATE_WAIT_L_FORK;
 	pthread_mutex_lock(&p->rt->forks[p->l_fork]);
 	philo_print(p, MSG_FORK);
 	if (p->l_fork == p->r_fork)
 	{
-		usleep(p->rt->data_ms[TIME_TO_DIE]);
+		usleep(p->rt->data_ms[TIME_TO_DIE] + 1000);
 		return ;
 	}
 	p->debug_state = STATE_WAIT_R_FORK;
@@ -49,8 +51,8 @@ static void	philo_think(t_philo *p)
 	philo_print(p, MSG_FORK);
 }
 
-// another potential deadlock sitation
-// still holding on to l and r fork, but waiting for print
+/// @brief eat and releast forks
+/// @param p pointer to philo
 static void	philo_eat(t_philo *p)
 {
 	if (p->is_dead && (p->l_fork != -1 || p->r_fork != -1))
@@ -63,17 +65,19 @@ static void	philo_eat(t_philo *p)
 	}
 	if (!p->rt->alive)
 		return ;
-	p->debug_state = STATE_EAT;
 	p->eat_count++;
+	p->death_tick = p->rt->cur_tick + p->rt->data[TIME_TO_DIE];
+	p->debug_state = STATE_EAT;
 	philo_print(p, MSG_EAT);
 	usleep(p->rt->data_ms[TIME_TO_EAT]);
 	pthread_mutex_unlock(&p->rt->forks[p->l_fork]);
 	pthread_mutex_unlock(&p->rt->forks[p->r_fork]);
-	p->last_eat = p->rt->cur_tick;
 	p->l_fork = -1;
 	p->r_fork = -1;
 }
 
+/// @brief sleep
+/// @param p poitner to philo
 static void	philo_sleep(t_philo *p)
 {
 	if (p->is_dead)
@@ -85,19 +89,19 @@ static void	philo_sleep(t_philo *p)
 	usleep(p->rt->data_ms[TIME_TO_SLEEP]);
 }
 
+/// @brief philo routine
+/// @param ptr pointer to philo
+/// @return return 0
 void	*philo_routine_new(void *ptr)
 {
 	t_philo	*p;
 
 	p = (t_philo *) ptr;
 	if (!p)
-	{
-		p->thread_status = THREAD_CLEAN_EXIT;
-		pthread_exit(NULL);
-	}
-	pthread_mutex_lock(&p->rt->ready);
-	pthread_mutex_unlock(&p->rt->ready);
-	p->last_eat = p->rt->cur_tick;
+		return (0);
+	pthread_mutex_lock(&p->rt->ready_flag);
+	pthread_mutex_unlock(&p->rt->ready_flag);
+	p->death_tick = p->rt->cur_tick + p->rt->data[TIME_TO_DIE];
 	while (!p->is_dead && p->rt->alive)
 	{
 		philo_think(p);
