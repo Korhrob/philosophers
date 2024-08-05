@@ -1,8 +1,8 @@
 NAME    = philosopher
 CC      = cc
-CFLAGS  = -g -Wall -Werror -Wextra #-fsanitize=thread
+CFLAGS  = -g -Wall -Werror -Wextra #-fsanitize=thread 
 DEBUG   = -DDEBUG=1
-SRC     = main.c threads.c philos_refactor.c timer.c mini_libft.c watcher.c
+SRC     = main.c threads.c philos_refactor.c timer.c mini_libft.c watcher.c get.c set.c
 OBJ     = $(SRC:.c=.o)
 
 all: $(NAME)

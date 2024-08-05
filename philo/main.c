@@ -18,6 +18,7 @@ static t_philo	*create_philo(t_runtime *rt, int id)
 	p->rt = rt;
 	p->l_fork = -1;
 	p->r_fork = -1;
+	p->alive = 1;
 	return (p);
 }
 
@@ -29,7 +30,7 @@ static int	initialize_struct(t_runtime *rt, int philos)
 {
 	int	i;
 
-	rt->alive = 1;
+	rt->run = 1;
 	rt->philos = ft_calloc(sizeof(t_philo *), philos);
 	rt->forks = ft_calloc(sizeof(t_mutex), (philos));
 	if (!rt->philos || !rt->forks)
@@ -67,6 +68,7 @@ static void	clean_struct(t_runtime *rt)
 	}
 	if (rt->forks)
 		free(rt->forks);
+	free(rt);
 }
 
 /// @brief parse the program arguments and print related errors
@@ -105,15 +107,17 @@ static int	parse_input(int argc, char **argv, t_runtime *rt)
 
 int	main(int argc, char **argv)
 {
-	t_runtime	runtime;
+	t_runtime	*runtime;
 
 	if (DEBUG)
 		printf(HINT_DEBUG);
-	memset(&runtime, 0, sizeof(runtime));
-	if (!parse_input(argc, argv, &runtime))
+	runtime = malloc(sizeof(t_runtime));
+	if (!runtime)
 		return (1);
-	if (initialize_struct(&runtime, runtime.data[PHILO_COUNT]))
-		philosophers(&runtime);
-	clean_struct(&runtime);
+	if (!parse_input(argc, argv, runtime))
+		return (1);
+	if (initialize_struct(runtime, runtime->data[PHILO_COUNT]))
+		run(runtime);
+	clean_struct(runtime);
 	return (0);
 }

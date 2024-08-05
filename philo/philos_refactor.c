@@ -9,65 +9,52 @@
 /// @param msg message
 static void	philo_print(t_philo *p, const char *msg)
 {
-	if (p->is_dead)
+	if (!get_philo_status(p))
 		return ;
-	if (!p->rt->alive)
+	if (!get_rt_status(p->rt))
 		return ;
-	p->debug_state = STATE_WAIT_PRINT;
-	pthread_mutex_lock(&p->rt->print);
-	if (!p->is_dead && p->rt->alive)
-		printf("%4d %d %s\n", p->rt->cur_tick, p->id, msg);
-	pthread_mutex_unlock(&p->rt->print);
+	pthread_mutex_lock(&p->rt->print_lock);
+	if (get_philo_status(p) && get_rt_status(p->rt))
+		printf("%4d %d %s\n", get_cur_tick(p->rt), p->id, msg);
+	pthread_mutex_unlock(&p->rt->print_lock);
 }
 
 /// @brief philos are thinking while waiting for forks
-/// used to swap forks like this, but it caused issues
-/// if (p->id % 2 == 1)
-/// {
-/// 	p->l_fork = p->l_fork ^ p->r_fork;
-/// 	p->r_fork = p->l_fork ^ p->r_fork;
-/// 	p->l_fork = p->l_fork ^ p->r_fork;
-/// }
 /// @param p pointer to philo
 static void	philo_think(t_philo *p)
 {
-	if (p->is_dead)
+	if (!get_philo_status(p))
 		return ;
-	if (!p->rt->alive)
+	if (!get_rt_status(p->rt))
 		return ;
 	philo_print(p, MSG_THINK);
 	p->l_fork = p->id;
 	p->r_fork = (p->id + 1) % p->rt->data[PHILO_COUNT];
-	p->debug_state = STATE_WAIT_L_FORK;
 	pthread_mutex_lock(&p->rt->forks[p->l_fork]);
 	philo_print(p, MSG_FORK);
 	if (p->l_fork == p->r_fork)
 	{
+		p->r_fork = -1;
 		usleep(p->rt->data_ms[TIME_TO_DIE] + 1000);
 		return ;
 	}
-	p->debug_state = STATE_WAIT_R_FORK;
 	pthread_mutex_lock(&p->rt->forks[p->r_fork]);
 	philo_print(p, MSG_FORK);
+
 }
 
 /// @brief eat and releast forks
 /// @param p pointer to philo
 static void	philo_eat(t_philo *p)
 {
-	if (p->is_dead && (p->l_fork != -1 || p->r_fork != -1))
-	{
-		if (p->l_fork != -1)
-			pthread_mutex_unlock(&p->rt->forks[p->l_fork]);
-		if (p->r_fork != -1)
-			pthread_mutex_unlock(&p->rt->forks[p->r_fork]);
+	if (!get_philo_status(p))
 		return ;
-	}
-	if (!p->rt->alive)
+	if (!get_rt_status(p->rt))
 		return ;
+	pthread_mutex_lock(&p->act);
 	p->eat_count++;
 	p->death_tick = p->rt->cur_tick + p->rt->data[TIME_TO_DIE];
-	p->debug_state = STATE_EAT;
+	pthread_mutex_unlock(&p->act);
 	philo_print(p, MSG_EAT);
 	usleep(p->rt->data_ms[TIME_TO_EAT]);
 	pthread_mutex_unlock(&p->rt->forks[p->l_fork]);
@@ -80,11 +67,10 @@ static void	philo_eat(t_philo *p)
 /// @param p poitner to philo
 static void	philo_sleep(t_philo *p)
 {
-	if (p->is_dead)
+	if (!get_philo_status(p))
 		return ;
-	if (!p->rt->alive)
+	if (!get_rt_status(p->rt))
 		return ;
-	p->debug_state = STATE_SLEEP;
 	philo_print(p, MSG_SLEEP);
 	usleep(p->rt->data_ms[TIME_TO_SLEEP]);
 }
@@ -99,16 +85,23 @@ void	*philo_routine_new(void *ptr)
 	p = (t_philo *) ptr;
 	if (!p)
 		return (0);
-	pthread_mutex_lock(&p->rt->ready_flag);
-	pthread_mutex_unlock(&p->rt->ready_flag);
-	p->death_tick = p->rt->cur_tick + p->rt->data[TIME_TO_DIE];
-	while (!p->is_dead && p->rt->alive)
+	pthread_mutex_lock(&p->rt->ready_lock);
+	pthread_mutex_unlock(&p->rt->ready_lock);
+	pthread_mutex_lock(&p->act);
+	p->death_tick = get_cur_tick(p->rt) + p->rt->data[TIME_TO_DIE];
+	pthread_mutex_unlock(&p->act);
+	while (get_philo_status(p) && get_rt_status(p->rt))
 	{
 		philo_think(p);
 		philo_eat(p);
 		philo_sleep(p);
 	}
+	if (p->l_fork != -1)
+		pthread_mutex_unlock(&p->rt->forks[p->l_fork]);
+	if (p->r_fork != -1)
+		pthread_mutex_unlock(&p->rt->forks[p->r_fork]);
+	pthread_mutex_lock(&p->act);
 	p->thread_status = THREAD_CLEAN_EXIT;
-	p->debug_state = STATE_ENDED;
+	pthread_mutex_unlock(&p->act);
 	return (0);
 }

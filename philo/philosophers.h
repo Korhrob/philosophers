@@ -62,17 +62,6 @@ typedef enum e_error
 	FLAG_JOIN_T		= 32,
 }	t_error;
 
-typedef enum e_debug_state
-{
-	STATE_IDLE,
-	STATE_WAIT_PRINT,
-	STATE_WAIT_L_FORK,
-	STATE_WAIT_R_FORK,
-	STATE_EAT,
-	STATE_SLEEP,
-	STATE_ENDED,
-}	t_debug_state;
-
 typedef enum e_thread_status
 {
 	THREAD_NOT_STARTED,
@@ -86,15 +75,15 @@ typedef enum e_thread_status
 typedef struct s_philo
 {
 	t_uint		id;
-	t_uint		is_dead;
+	t_uint		alive;
 	t_uint		death_tick;
 	t_uint		eat_count;
-	t_uint		debug_state;
 	int			l_fork;
 	int			r_fork;
 	t_runtime	*rt;
 	pthread_t	thread;
 	t_tstatus	thread_status;
+	t_mutex		act;
 }	t_philo;
 
 typedef struct s_runtime
@@ -104,14 +93,15 @@ typedef struct s_runtime
 	int			data_ms[6];
 	t_uint		start_tick;
 	t_uint		cur_tick;
-	t_uint		alive;
+	t_uint		run;
 	t_philo		**philos;
 	pthread_t	timer;
 	pthread_t	watcher;
 	t_mutex		*forks;
-	t_mutex		tick;
-	t_mutex		print;
-	t_mutex		ready_flag;
+	t_mutex		timer_lock;
+	t_mutex		print_lock;
+	t_mutex		ready_lock;
+	t_mutex		watch_lock;
 }	t_runtime;
 
 // mini libft
@@ -119,7 +109,7 @@ int		ft_atoi(char *str);
 void	*ft_calloc(int size, int count);
 
 // philosophers
-void	philosophers(t_runtime *rt);
+void	run(t_runtime *rt);
 
 // routine
 void	*philo_routine_new(void *ptr);
@@ -133,5 +123,12 @@ void	create_timer(t_runtime *rt);
 // watcher
 void	*watch_philos(void *ptr);
 void	create_watcher(t_runtime *rt);
+
+// get
+int		get_rt_status(t_runtime *rt);
+int 	get_philo_status(t_philo *philo);
+t_uint	get_philo_death(t_philo *philo);
+t_uint	get_philo_eat(t_philo *philo);
+t_uint	get_cur_tick(t_runtime *rt);
 
 #endif

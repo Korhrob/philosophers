@@ -9,10 +9,14 @@ static void	init_mutex(t_runtime *rt)
 	int	i;
 
 	i = -1;
-	pthread_mutex_init(&rt->print, NULL);
-	pthread_mutex_init(&rt->tick, NULL);
+	pthread_mutex_init(&rt->print_lock, NULL);
+	pthread_mutex_init(&rt->timer_lock, NULL);
+	pthread_mutex_init(&rt->watch_lock, NULL);
 	while (++i < rt->data[PHILO_COUNT])
+	{
 		pthread_mutex_init(&rt->forks[i], NULL);
+		pthread_mutex_init(&rt->philos[i]->act, NULL);
+	}
 }
 
 /// @brief destroy mutexes
@@ -24,8 +28,9 @@ static void	destroy_mutex(t_runtime *rt)
 	i = -1;
 	while (++i < rt->data[PHILO_COUNT])
 		pthread_mutex_destroy(&rt->forks[i]);
-	pthread_mutex_destroy(&rt->print);
-	pthread_mutex_destroy(&rt->tick);
+	pthread_mutex_destroy(&rt->print_lock);
+	pthread_mutex_destroy(&rt->timer_lock);
+	pthread_mutex_destroy(&rt->watch_lock);
 }
 
 /// @brief create philo threads
@@ -35,7 +40,7 @@ static void	create_threads(t_runtime *rt)
 	int			i;
 
 	i = -1;
-	pthread_mutex_lock(&rt->ready_flag);
+	pthread_mutex_lock(&rt->ready_lock);
 	create_timer(rt);
 	create_watcher(rt);
 	while (++i < rt->data[PHILO_COUNT])
@@ -43,14 +48,14 @@ static void	create_threads(t_runtime *rt)
 		if (pthread_create(&rt->philos[i]->thread, NULL, &philo_routine_new, rt->philos[i]))
 		{
 			printf(ERR_THREAD, i);
+			rt->run = FALSE;
 			rt->philos[i]->thread_status = THREAD_CREATE_FAIL;
 			rt->eflag |= FLAG_PHILO;
 			break ;
 		}
-		printf("create thread %p\n", &rt->philos[i]->thread);
 		rt->philos[i]->thread_status = THREAD_STARTED;
 	}
-	pthread_mutex_unlock(&rt->ready_flag);
+	pthread_mutex_unlock(&rt->ready_lock);
 }
 
 /// @brief join all threads and set flags
@@ -65,14 +70,11 @@ static void	join_threads(t_runtime *rt)
 		if (pthread_join(rt->philos[i]->thread, NULL))
 		{
 			printf(ERR_THREAD, i);
-			rt->alive = FALSE;
 			rt->philos[i]->thread_status = THREAD_JOIN_FAIL;
 			rt->eflag |= (rt->eflag & FLAG_JOIN);
-			//detach
+			//detach this thread
 			break;
 		}
-		printf("join %d\n", i);
-		printf("join thread %p\n", &rt->philos[i]->thread);
 	}
 	if (!pthread_join(rt->watcher, NULL))
 		rt->eflag |= FLAG_JOIN_W;
@@ -80,14 +82,27 @@ static void	join_threads(t_runtime *rt)
 		rt->eflag |= FLAG_JOIN_T;
 }
 
-/// @brief create and join all threads
+/// @brief create and join all threads RENAME
 /// @param rt runtime struct
-void	philosophers(t_runtime *rt)
+void	run(t_runtime *rt)
 {
 	init_mutex(rt);
 	create_threads(rt);
 	if (rt->eflag)
-		rt->alive = FALSE;
+		rt->run = FALSE;
 	join_threads(rt);
 	destroy_mutex(rt);
 }
+
+	// while (++i < rt->data[PHILO_COUNT])
+	// {
+	// 	p = rt->philos[i];
+	// 	if (p->thread_status != THREAD_CLEAN_EXIT)
+	// 	{
+	// 		if (p->thread_status == THREAD_JOIN_FAIL)
+	// 		{
+	// 			printf(ERR_DEATCH);
+	// 			pthread_detach(p->thread);
+	// 		}
+	// 	}
+	// }

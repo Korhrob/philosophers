@@ -36,18 +36,18 @@ void	*timer_tick(void *ptr)
 	t_runtime	*rt;
 
 	rt = (t_runtime *)ptr;
-	pthread_mutex_lock(&rt->ready_flag);
-	pthread_mutex_unlock(&rt->ready_flag);
-	pthread_mutex_lock(&rt->tick);
+	pthread_mutex_lock(&rt->ready_lock);
+	pthread_mutex_unlock(&rt->ready_lock);
+	pthread_mutex_lock(&rt->timer_lock);
 	rt->start_tick = get_tick();
 	rt->cur_tick = 0;
-	pthread_mutex_unlock(&rt->tick);
-	while (rt->alive)
+	pthread_mutex_unlock(&rt->timer_lock);
+	while (get_rt_status(rt))
 	{
 		ft_usleep(1, rt);
-		pthread_mutex_lock(&rt->tick);
+		pthread_mutex_lock(&rt->timer_lock);
 		rt->cur_tick = get_tick() - rt->start_tick;
-		pthread_mutex_unlock(&rt->tick);
+		pthread_mutex_unlock(&rt->timer_lock);
 	}
 	return (0);
 }
