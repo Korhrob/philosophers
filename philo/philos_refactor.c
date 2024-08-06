@@ -30,6 +30,12 @@ static void	philo_think(t_philo *p)
 	philo_print(p, MSG_THINK);
 	p->l_fork = p->id;
 	p->r_fork = (p->id + 1) % p->rt->data[PHILO_COUNT];
+	if (p->id % 2)
+	{
+		p->l_fork = p->l_fork ^ p->r_fork;
+		p->r_fork = p->l_fork ^ p->r_fork;
+		p->l_fork = p->l_fork ^ p->r_fork;
+	}
 	pthread_mutex_lock(&p->rt->forks[p->l_fork]);
 	philo_print(p, MSG_FORK);
 	if (p->l_fork == p->r_fork)
