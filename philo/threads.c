@@ -47,10 +47,10 @@ static void	create_threads(t_runtime *rt)
 	{
 		if (pthread_create(&rt->philos[i]->thread, NULL, &philo_routine_new, rt->philos[i]))
 		{
-			printf(ERR_THREAD, i);
 			rt->run = FALSE;
 			rt->philos[i]->thread_status = THREAD_CREATE_FAIL;
-			rt->eflag |= FLAG_PHILO;
+			rt->eflag |= FLAG_PHILOT;
+			printf(ERR_THREAD, i);
 			break ;
 		}
 		rt->philos[i]->thread_status = THREAD_STARTED;
@@ -71,7 +71,7 @@ static void	join_threads(t_runtime *rt)
 		{
 			printf(ERR_THREAD, i);
 			rt->philos[i]->thread_status = THREAD_JOIN_FAIL;
-			rt->eflag |= (rt->eflag & FLAG_JOIN);
+			rt->eflag |= (rt->eflag & FLAG_JOIN_P);
 			//detach this thread
 			break;
 		}
@@ -93,16 +93,3 @@ void	run(t_runtime *rt)
 	join_threads(rt);
 	destroy_mutex(rt);
 }
-
-	// while (++i < rt->data[PHILO_COUNT])
-	// {
-	// 	p = rt->philos[i];
-	// 	if (p->thread_status != THREAD_CLEAN_EXIT)
-	// 	{
-	// 		if (p->thread_status == THREAD_JOIN_FAIL)
-	// 		{
-	// 			printf(ERR_DEATCH);
-	// 			pthread_detach(p->thread);
-	// 		}
-	// 	}
-	// }

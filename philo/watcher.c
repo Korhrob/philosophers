@@ -71,7 +71,7 @@ static int	check_death(t_runtime *rt, t_philo *philo)
 			pthread_mutex_lock(&rt->print_lock);
 			pthread_mutex_lock(&rt->watch_lock);
 			rt->run = 0;
-			printf("%4d %d %s\n", get_cur_tick(rt), philo->id, MSG_DIE);
+			printf("%d %d %s\n", get_cur_tick(rt), philo->id, MSG_DIE);
 			pthread_mutex_unlock(&rt->watch_lock);
 			pthread_mutex_unlock(&rt->print_lock);
 		}
@@ -80,7 +80,8 @@ static int	check_death(t_runtime *rt, t_philo *philo)
 	return (0);
 }
 
-/// @brief watch all philos and quit program if one dies
+/// @brief watch all philos and quit program if someone dies
+/// or eat count reaches desired amount
 /// @param ptr runtime struct
 /// @return NULL
 void	*watch_philos(void *ptr)
@@ -105,12 +106,12 @@ void	*watch_philos(void *ptr)
 }
 
 /// @brief create a watcher thread and set error flag if needed
-/// @param rt runtime structSS
+/// @param rt runtime struct
 void	create_watcher(t_runtime *rt)
 {
 	if (pthread_create(&rt->watcher, NULL, &watch_philos, rt))
 	{
-		rt->eflag |= FLAG_WATCHER;
+		rt->eflag |= FLAG_WATCHERT;
 		printf(ERR_WATCHER);
 	}
 }

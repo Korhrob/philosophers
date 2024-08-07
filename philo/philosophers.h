@@ -54,10 +54,10 @@ typedef enum e_data
 
 typedef enum e_error
 {
-	FLAG_WATCHER	= 1,
-	FLAG_TIMER		= 2,
-	FLAG_PHILO		= 4,
-	FLAG_JOIN		= 8,
+	FLAG_WATCHERT	= 1,
+	FLAG_TIMERT		= 2,
+	FLAG_PHILOT		= 4,
+	FLAG_JOIN_P		= 8,
 	FLAG_JOIN_W		= 16,
 	FLAG_JOIN_T		= 32,
 }	t_error;

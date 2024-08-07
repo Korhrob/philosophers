@@ -58,7 +58,7 @@ void	create_timer(t_runtime *rt)
 {
 	if (pthread_create(&rt->timer, NULL, &timer_tick, rt))
 	{
-		rt->eflag |= FLAG_TIMER;
+		rt->eflag |= FLAG_TIMERT;
 		printf(ERR_TIMER);
 	}
 }
