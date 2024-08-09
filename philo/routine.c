@@ -53,7 +53,6 @@ static void	philo_think(t_philo *p)
 	}
 	pthread_mutex_lock(&p->rt->forks[p->r_fork]);
 	philo_print(p, MSG_FORK);
-
 }
 
 /// @brief eat and releast forks
@@ -91,7 +90,7 @@ static void	philo_sleep(t_philo *p)
 /// @brief philo routine
 /// @param ptr pointer to philo
 /// @return return 0
-void	*philo_routine_new(void *ptr)
+void	*routine(void *ptr)
 {
 	t_philo	*p;
 

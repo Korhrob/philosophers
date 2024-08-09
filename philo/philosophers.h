@@ -112,7 +112,7 @@ void	*ft_calloc(int size, int count);
 void	run(t_runtime *rt);
 
 // routine
-void	*philo_routine_new(void *ptr);
+void	*routine(void *ptr);
 
 // timer
 t_uint	get_tick(void);
@@ -126,7 +126,7 @@ void	create_watcher(t_runtime *rt);
 
 // get
 int		get_rt_status(t_runtime *rt);
-int 	get_philo_status(t_philo *philo);
+int		get_philo_status(t_philo *philo);
 t_uint	get_philo_death(t_philo *philo);
 t_uint	get_philo_eat(t_philo *philo);
 t_uint	get_cur_tick(t_runtime *rt);

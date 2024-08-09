@@ -13,9 +13,8 @@ int	get_rt_status(t_runtime *rt)
 	return (r);
 }
 
-
 // return 1 if alive
-int get_philo_status(t_philo *philo)
+int	get_philo_status(t_philo *philo)
 {
 	int	r;
 

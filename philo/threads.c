@@ -37,7 +37,7 @@ static void	destroy_mutex(t_runtime *rt)
 /// @param rt runtime struct
 static void	create_threads(t_runtime *rt)
 {
-	int			i;
+	int	i;
 
 	i = -1;
 	pthread_mutex_lock(&rt->ready_lock);
@@ -45,7 +45,10 @@ static void	create_threads(t_runtime *rt)
 	create_watcher(rt);
 	while (++i < rt->data[PHILO_COUNT])
 	{
-		if (pthread_create(&rt->philos[i]->thread, NULL, &philo_routine_new, rt->philos[i]))
+		if (pthread_create(
+				&rt->philos[i]->thread,
+				NULL,
+				&routine, rt->philos[i]))
 		{
 			rt->run = FALSE;
 			rt->philos[i]->thread_status = THREAD_CREATE_FAIL;
@@ -72,8 +75,7 @@ static void	join_threads(t_runtime *rt)
 			printf(ERR_THREAD, i);
 			rt->philos[i]->thread_status = THREAD_JOIN_FAIL;
 			rt->eflag |= (rt->eflag & FLAG_JOIN_P);
-			//detach this thread
-			break;
+			break ;
 		}
 	}
 	if (!pthread_join(rt->watcher, NULL))

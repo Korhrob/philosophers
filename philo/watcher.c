@@ -7,7 +7,7 @@
 /// @param rt runtime struct
 static void	stop_program(t_runtime *rt)
 {
-	int		i;
+	int	i;
 
 	pthread_mutex_lock(&rt->watch_lock);
 	rt->run = 0;
@@ -64,7 +64,7 @@ static int	check_death(t_runtime *rt, t_philo *philo)
 	if (get_cur_tick(rt) >= get_philo_death(philo))
 	{
 		pthread_mutex_lock(&philo->act);
-		philo->alive = 0; // use setter
+		philo->alive = 0;
 		pthread_mutex_unlock(&philo->act);
 		if (get_rt_status(rt))
 		{
