@@ -21,6 +21,7 @@ static void	init_mutex(t_runtime *rt)
 	int	i;
 
 	i = -1;
+	pthread_mutex_init(&rt->ready_lock, NULL);
 	pthread_mutex_init(&rt->print_lock, NULL);
 	pthread_mutex_init(&rt->timer_lock, NULL);
 	pthread_mutex_init(&rt->watch_lock, NULL);
@@ -40,6 +41,7 @@ static void	destroy_mutex(t_runtime *rt)
 	i = -1;
 	while (++i < rt->data[PHILO_COUNT])
 		pthread_mutex_destroy(&rt->forks[i]);
+	pthread_mutex_destroy(&rt->ready_lock);
 	pthread_mutex_destroy(&rt->print_lock);
 	pthread_mutex_destroy(&rt->timer_lock);
 	pthread_mutex_destroy(&rt->watch_lock);

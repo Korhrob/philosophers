@@ -20,8 +20,6 @@
 # endif
 
 # define ERR_THREAD "critical error: creating or joing thread %d failed\n"
-# define ERR_HANG "hanging thread %d, thread status: %s\n"
-# define ERR_DEATCH "thread was joined, detaching...\n"
 # define ERR_INVALID_ARGC "error: invalid argument count\n"
 # define ERR_INVALID_ARGV "error: invalid argument '%s'\n"
 # define ERR_WATCHER "watcher thread failed\n"
@@ -106,9 +104,9 @@ typedef struct s_runtime
 	t_uint		start_tick;
 	t_uint		cur_tick;
 	t_uint		run;
-	t_philo		**philos;
 	pthread_t	timer;
 	pthread_t	watcher;
+	t_philo		**philos;
 	t_mutex		*forks;
 	t_mutex		timer_lock;
 	t_mutex		print_lock;

@@ -1,6 +1,6 @@
 NAME    = philo
 CC      = cc
-CFLAGS  = -g -Wall -Werror -Wextra #-fsanitize=thread 
+CFLAGS  = -Wall -Werror -Wextra -g #-fsanitize=thread
 DEBUG   = -DDEBUG=1
 SRC     = main.c threads.c routine.c timer.c mini_libft.c watcher.c get.c
 OBJ     = $(SRC:.c=.o)

@@ -29,9 +29,9 @@ static void	philo_print(t_philo *p, const char *msg)
 	if (get_philo_status(p) && get_rt_status(p->rt))
 	{
 		if (DEBUG)
-			printf("%4d %d %s\n", get_cur_tick(p->rt), p->id, msg);
+			printf("%4d %d %s\n", get_cur_tick(p->rt), p->id + 1, msg);
 		else
-			printf("%d %d %s\n", get_cur_tick(p->rt), p->id, msg);
+			printf("%d %d %s\n", get_cur_tick(p->rt), p->id + 1, msg);
 	}
 	pthread_mutex_unlock(&p->rt->print_lock);
 }
@@ -49,7 +49,7 @@ static void	philo_think(t_philo *p)
 		usleep(p->rt->data_ms[TIME_TO_EAT] / 2);
 	p->l_fork = p->id;
 	p->r_fork = (p->id + 1) % p->rt->data[PHILO_COUNT];
-	if (p->id % 2 == 0 && p->eat_count == 0)
+	if (p->r_fork < p->l_fork)
 	{
 		p->l_fork = p->l_fork ^ p->r_fork;
 		p->r_fork = p->l_fork ^ p->r_fork;

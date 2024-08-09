@@ -83,7 +83,7 @@ static int	check_death(t_runtime *rt, t_philo *philo)
 			pthread_mutex_lock(&rt->print_lock);
 			pthread_mutex_lock(&rt->watch_lock);
 			rt->run = 0;
-			printf("%d %d %s\n", get_cur_tick(rt), philo->id, MSG_DIE);
+			printf("%d %d %s\n", get_cur_tick(rt), philo->id + 1, MSG_DIE);
 			pthread_mutex_unlock(&rt->watch_lock);
 			pthread_mutex_unlock(&rt->print_lock);
 		}

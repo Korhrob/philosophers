@@ -42,6 +42,9 @@ static int	initialize_struct(t_runtime *rt, int philos)
 {
 	int	i;
 
+	rt->eflag = 0;
+	rt->cur_tick = 0;
+	rt->start_tick = 0;
 	rt->run = 1;
 	rt->philos = ft_calloc(sizeof(t_philo *), philos);
 	rt->forks = ft_calloc(sizeof(t_mutex), (philos));
@@ -119,17 +122,18 @@ static int	parse_input(int argc, char **argv, t_runtime *rt)
 
 int	main(int argc, char **argv)
 {
-	t_runtime	*runtime;
+	t_runtime	*rt;
 
 	if (DEBUG)
 		printf(HINT_DEBUG);
-	runtime = malloc(sizeof(t_runtime));
-	if (!runtime)
+	rt = NULL;
+	rt = malloc(sizeof(t_runtime));
+	if (!rt)
 		return (1);
-	if (!parse_input(argc, argv, runtime))
+	if (!parse_input(argc, argv, rt))
 		return (1);
-	if (initialize_struct(runtime, runtime->data[PHILO_COUNT]))
-		run(runtime);
-	clean_struct(runtime);
+	if (initialize_struct(rt, rt->data[PHILO_COUNT]))
+		run(rt);
+	clean_struct(rt);
 	return (0);
 }
