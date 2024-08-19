@@ -45,16 +45,10 @@ static void	philo_think(t_philo *p)
 	if (!get_rt_status(p->rt))
 		return ;
 	philo_print(p, MSG_THINK);
-	if (p->id % 2 && p->eat_count == 0)
-		usleep(p->rt->data_ms[TIME_TO_EAT] / 2);
 	p->l_fork = p->id;
 	p->r_fork = (p->id + 1) % p->rt->data[PHILO_COUNT];
-	if (p->r_fork < p->l_fork)
-	{
-		p->l_fork = p->l_fork ^ p->r_fork;
-		p->r_fork = p->l_fork ^ p->r_fork;
-		p->l_fork = p->l_fork ^ p->r_fork;
-	}
+	if (p->id % 2 && p->eat_count == 0)
+		usleep(p->rt->data_ms[TIME_TO_EAT] / 2);
 	pthread_mutex_lock(&p->rt->forks[p->l_fork]);
 	philo_print(p, MSG_FORK);
 	if (p->l_fork == p->r_fork)
