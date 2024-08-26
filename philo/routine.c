@@ -71,12 +71,12 @@ static void	philo_eat(t_philo *p)
 		return ;
 	pthread_mutex_lock(&p->act);
 	p->eat_count++;
-	p->death_tick = p->rt->cur_tick + p->rt->data[TIME_TO_DIE];
+	p->death_tick = get_cur_tick(p->rt) + p->rt->data[TIME_TO_DIE];
 	pthread_mutex_unlock(&p->act);
 	philo_print(p, MSG_EAT);
 	usleep(p->rt->data_ms[TIME_TO_EAT]);
-	pthread_mutex_unlock(&p->rt->forks[p->l_fork]);
 	pthread_mutex_unlock(&p->rt->forks[p->r_fork]);
+	pthread_mutex_unlock(&p->rt->forks[p->l_fork]);
 	p->l_fork = -1;
 	p->r_fork = -1;
 }
